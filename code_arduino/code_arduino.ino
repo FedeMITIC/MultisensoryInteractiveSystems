@@ -1,7 +1,7 @@
 /**
 * Developed for Teensy 3.6
 * 
-* Reads the values from the IMU and sends signals to actuators (2 motors) and external speakers.
+* Reads the values from the IMU and sends signals to actuators (2 motors) through messages received from external source.
 * 
 * Author: Federico Macchi - federico.macchi-1@studenti.unitn.it
 * Contributors: Nicola "Lynn" Baratella - nicola.baratella@studenti.unitn.it
@@ -17,9 +17,20 @@
 #include <IIRFilter.h>
 #include <string.h>
 
-#define BAUD_RATE 115200 //NOTE: not used for Teensy
+#define BAUD_RATE 115200 //NOTE: not used for Teensy (ignored)
 
 /* Variables for incoming messages *************************************************************/
+
+/*
+ * Messages available
+ * [motor1, 0]: switches OFF the motor on the left
+ * [motor1, 1]: switches ON  the motor on the left
+ * [motor2, 0]: switches OFF the motor on the right
+ * [motor2, 1]: switches ON  the motor on the right
+ * 
+ * The first element always refer to the component, the second always refer to the state (ON/OFF)
+ * "[" and "]" are the message delimiters, "0"s and "1"s are integers.
+ */
 
 const byte MAX_LENGTH_MESSAGE = 64;
 char received_message[MAX_LENGTH_MESSAGE];
@@ -33,72 +44,14 @@ boolean new_message_received = false;
 /* Digital outputs *************************************************************/
 /*
  * Motors:
- *  Motor 1: 
- *  Motor 2:
- * Speakers:
- *  Soundcard: 
+ *  Motor 1 (left):  PIN 35 (PWM)
+ *  Motor 2 (right): PIN 23 (PWM)
  */
-const uint16_t digital_output0_pin = 3; 
-const uint16_t digital_output1_pin = 4; 
-const uint16_t digital_output2_pin = 5; 
-const uint16_t digital_output3_pin = 9; 
-const uint16_t digital_output4_pin = 10; 
-
-int digital_output0_LED_state = HIGH;  
-int digital_output1_LED_state = HIGH;  
-int digital_output2_LED_state = HIGH;    
-
-
-unsigned long digital_input0_last_debounce_time = 0;  
-unsigned long digital_input1_last_debounce_time = 0;  
-unsigned long digital_input2_last_debounce_time = 0;  
-
-unsigned long debounce_delay = 50;    // the debounce time; increase if the output flickers
-
-/* Analog inputs with Butterworth filter ******************************************************************************************/
+const uint16_t motor_left = 35; 
+const uint16_t motor_right = 23;    
 
 #define ANALOG_BIT_RESOLUTION 12
-
-//static const unsigned long ANALOG_PERIOD_MILLISECS = 1; // E.g. 4 milliseconds per sample for 250 Hz
-//static const unsigned long ANALOG_ANALOG_PERIOD_MICROSECS = 1000 * PERIOD_MILLISECS;
-//static const float ANALOG_SAMPLING_FREQUENCY = 1.0e3f / PERIOD_MILLISECS;
 #define ANALOG_PERIOD_MICROSECS 1000
-// static uint32_t analog_last_read = 0;
-
-
-uint16_t analog_input0_pin = 0;
-uint16_t analog_input1_pin = 1;
-uint16_t analog_input2_pin = 2;
-uint16_t analog_input3_pin = 3;
-
-uint16_t analog_input0 = 0;
-uint16_t analog_input1 = 0;
-uint16_t analog_input2 = 0;
-uint16_t analog_input3 = 0;
-
-uint16_t analog_input0_lp_filtered = 0;
-uint16_t analog_input1_lp_filtered = 0;
-uint16_t analog_input2_lp_filtered = 0;
-uint16_t analog_input3_lp_filtered = 0;
-
-uint16_t previous_analog_input0_lp_filtered = 0;
-uint16_t previous_analog_input1_lp_filtered = 0;
-uint16_t previous_analog_input2_lp_filtered = 0;
-uint16_t previous_analog_input3_lp_filtered = 0;
-
-// 50 Hz Butterworth low-pass
-double a_lp_50Hz[] = {1.000000000000, -3.180638548875, 3.861194348994, -2.112155355111, 0.438265142262};
-double b_lp_50Hz[] = {0.000416599204407, 0.001666396817626, 0.002499595226440, 0.001666396817626, 0.000416599204407};
-IIRFilter lp_analog_input0(b_lp_50Hz, a_lp_50Hz);
-IIRFilter lp_analog_input1(b_lp_50Hz, a_lp_50Hz);
-IIRFilter lp_analog_input2(b_lp_50Hz, a_lp_50Hz);
-IIRFilter lp_analog_input3(b_lp_50Hz, a_lp_50Hz);
-
-//Thresholds for each sensor
-uint16_t analog_input0_threshold = 75;
-uint16_t analog_input1_threshold = 10;
-uint16_t analog_input2_threshold = 5;
-uint16_t analog_input3_threshold = 10;
 
 /* IMU ***************************************************************************************************/
 
@@ -253,7 +206,7 @@ void receive_message() {
 
     while (Serial.available() > 0 && new_message_received == false) {
         rcv_char = Serial.read();
-        Serial.println(rcv_char);
+        // Serial.println(rcv_char);
 
         if (reception_in_progress == true) {
             if (rcv_char!= END_MARKER) {
@@ -282,14 +235,23 @@ void receive_message() {
 }
 
 void handle_received_message(char *received_message) {
-
-  Serial.print("received_message: ");
-  Serial.println(received_message);
-
-  
   char *all_tokens[2]; //NOTE: the message is composed by 2 tokens: command and value
   const char delimiters[5] = {START_MARKER, ',', ' ', END_MARKER,'\0'};
   int i = 0;
+
+  // @see https://www.arduino.cc/reference/en/language/functions/analog-io/analogwrite/
+  // To set the duty cycle for the motors; before using check the maximum Voltage that a motor can receive and scale accordingly
+  // e.g. if a motor that needs 3V is supplied with 5V (this happens if a motor needs a certain A that is provided only by the 5V pin),
+  // the maximum duty cycle is duty_cycle_60 (3V/5V = 0,6 = 60%)
+
+  // Red small motors: https://www.precisionmicrodrives.com/product/304-116-5mm-vibration-motor-20mm-type
+  // Teensy outputs around 100mA current, and those motors draw at most 55/60mA each; at 3.3V (Teensy 3.6 output) they draw 50mA each, so Teensy alone is sufficient to power them
+  const int duty_cycle_max = 255; // 100%
+  const int duty_cycle_80 = 204;  //  80%
+  const int duty_cycle_60 = 153;  //  60%
+  const int duty_cycle_40 = 102;  //  40%
+  const int duty_cycle_20 = 51;   //  20%
+  const int duty_cycle_min = 0;   //   0%
 
   all_tokens[i] = strtok(received_message, delimiters);
   
@@ -301,76 +263,39 @@ void handle_received_message(char *received_message) {
   char *value = all_tokens[1];
 
 
-  if (strcmp(command,"motor1_pattern1") == 0 && strcmp(value,"1") == 0) {
-
-    /*
-    Serial.print("activating message 1: ");
-    Serial.print(command);
-    Serial.print(" ");
-    Serial.print(value);
-    Serial.println(" ");
-    */
-    
-    analogWrite(digital_output3_pin, 200);
-    
+  if (strcmp(command,"motor1") == 0 && strcmp(value,"1") == 0) {
+    Serial.println("MOTOR 1 (left) ON ");
+    analogWrite(motor_left, duty_cycle_20);
   }
   
-  if (strcmp(command,"motor1_pattern1") == 0 && strcmp(value,"0") == 0) {
-
-    Serial.print("activating message 2: ");
-    Serial.print(command);
-    Serial.print(" ");
-    Serial.print(value);
-    Serial.println(" ");
-
-    analogWrite(digital_output3_pin, 0);
-    
+  if (strcmp(command,"motor1") == 0 && strcmp(value,"0") == 0) {
+    Serial.println("MOTOR 1 (left) OFF ");
+    analogWrite(motor_left, duty_cycle_min);
   }
 
-
+  if (strcmp(command,"motor2") == 0 && strcmp(value,"1") == 0) {
+    Serial.println("MOTOR 2 (right) ON ");
+    analogWrite(motor_right, duty_cycle_20);       
+  }
   
-  if (strcmp(command,"LED1_pattern1") == 0) {
-
-    Serial.print("activating message 1: ");
-    Serial.print(command);
-    Serial.print(" ");
-    Serial.print(value);
-    Serial.println(" ");
-    
-    analogWrite(digital_output4_pin, atoi(value));
-    
-  }  
+  if (strcmp(command,"motor2") == 0 && strcmp(value,"0") == 0) {
+    Serial.println("MOTOR 2 (right) OFF ");
+    analogWrite(motor_right, duty_cycle_min);
+  }
 } 
 
 
-
-
-
-
-
-
-
-
-
-/**************************************************************************************************************/
-
+/***************************************** SETUP FUNCTION ***********************************************/
 void setup() {
   Serial.begin(BAUD_RATE);
   while(!Serial);
 
-  /* Setup of the digital sensors ******************************************************************************/
-  pinMode(digital_output0_pin, OUTPUT);
-  pinMode(digital_output1_pin, OUTPUT);
-  pinMode(digital_output2_pin, OUTPUT);
-  pinMode(digital_output3_pin, OUTPUT);
-  pinMode(digital_output4_pin, OUTPUT);
-
-
-  digitalWrite(digital_output0_pin, HIGH);
-  digitalWrite(digital_output1_pin, HIGH);
-  digitalWrite(digital_output2_pin, HIGH);
-  digitalWrite(digital_output3_pin, LOW);
-  digitalWrite(digital_output4_pin, LOW);
+  /* Setup of the digital sensors */
+  pinMode(motor_left, OUTPUT);
+  pinMode(motor_right, OUTPUT);
+  /* Make sure both motors are off when starting */
+  digitalWrite(motor_left, 0);
+  digitalWrite(motor_right, 0);
 
   /* Setup of the analog sensors ******************************************************************************/
  
@@ -390,8 +315,7 @@ void setup() {
   long eeBnoID;
   long bnoID;
   bool foundCalib = false;
-
-    
+  
   if(reset_calibration){// Then reset the EEPROM so a new calibration can be made
     
     EEPROM.put(eeAddress, 0);
@@ -452,13 +376,8 @@ void setup() {
   }
 
   if(display_BNO055_info){
-    
-    /* Display some basic information on this sensor */
     displaySensorDetails();
-
-    /* Optional: Display current status */
     displaySensorStatus();
-
   }
 
   /* Crystal must be configured AFTER loading calibration data into BNO055. */
@@ -468,13 +387,10 @@ void setup() {
     performMagCal(); /* always recalibrate the magnetometers as it goes out of calibration very often */
   }
   else {
-    
     if(display_BNO055_info){
-      
       Serial.println("Please Calibrate Sensor: ");
       delay(2000); 
     }
-        
     while (!bno.isFullyCalibrated()){
       if(display_BNO055_info){
             displayCalStatus();
@@ -517,9 +433,9 @@ void setup() {
 
 void loop() {
   /* Receive the messages from PD to control the actuators */
-  // receive_message();
+  receive_message();
      
-  /* Loop for the IMU BNO055 sensor ******************************************************************************/
+  /* Reads the data from the IMU BNO055 sensor only after the timeout. */
   if (micros() - BNO055_last_read >= BNO055_PERIOD_MICROSECS) {
     BNO055_last_read += BNO055_PERIOD_MICROSECS;
     sensors_event_t orientationData, angVelData, linearAccelData;
@@ -533,37 +449,12 @@ void loop() {
      The Yaw values are between 0° to +360°
      The Roll values are between -90° and +90°
      The Pitch values are between -180° and +180°
+
+     We are interested only in the ROLL values (to determine the inclination angle of the bar)
     */ 
-    
-    /*Serial.print(": Euler x= ");
-    Serial.print(orientationData.orientation.x + correction_x); */
     Serial.print("Rotation_angle:"); 
-    Serial.print(-(orientationData.orientation.y + correction_y));
+    Serial.print(orientationData.orientation.y + correction_y);
     Serial.println("");
-    /*Serial.print(" | Euler z= ");
-    Serial.print(orientationData.orientation.z + correction_z);*/
-    
-    /*Serial.print(": angVel x= ");
-    Serial.print(angVelData.gyro.x);
-    Serial.print(" | angVel y= ");
-    Serial.print(angVelData.gyro.y);
-    Serial.print(" | angVel z= ");
-    Serial.print(angVelData.gyro.z);*/
-
-    /*Serial.print(": linearAccel x= ");
-    Serial.print(linearAccelData.acceleration.x);
-    Serial.print(" | linearAccel y= ");
-    Serial.print(linearAccelData.acceleration.y);
-    Serial.print(" | linearAccel z= ");
-    Serial.print(linearAccelData.acceleration.z);*/
-    
-    /* Optional: Display calibration status */
-    // displayCalStatus();
-    /* Optional: Display sensor status (debug only) */
-    // displaySensorStatus();
-    /* New line for the next sample */
-    //Serial.println("");
-
-    }//End loop IMU
+  }
    
 }
