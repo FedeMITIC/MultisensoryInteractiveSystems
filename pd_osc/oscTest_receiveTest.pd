@@ -1,0 +1,13 @@
+#N canvas 580 225 450 300 12;
+#X obj 26 84 unpackOSC;
+#X obj 29 121 routeOSC /angle;
+#X obj 82 24 netreceive -u -b 7777;
+#X obj 221 220 print;
+#X obj 262 112 prepend OutputPack:;
+#X obj 9 167 prepend OutputAngle:;
+#X connect 0 0 1 0;
+#X connect 1 0 5 0;
+#X connect 2 0 0 0;
+#X connect 2 0 4 0;
+#X connect 4 0 3 0;
+#X connect 5 0 3 0;
