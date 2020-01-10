@@ -12,9 +12,9 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
-#include <utility/imumaths.h>
+// #include <utility/imumaths.h>
 #include <EEPROM.h>
-#include <IIRFilter.h>
+// #include <IIRFilter.h>
 #include <string.h>
 
 #define BAUD_RATE 115200 //NOTE: not used for Teensy (ignored)
@@ -246,10 +246,11 @@ void handle_received_message(char *received_message) {
 
   // Red small motors: https://www.precisionmicrodrives.com/product/304-116-5mm-vibration-motor-20mm-type
   // Teensy outputs around 100mA current, and those motors draw at most 55/60mA each; at 3.3V (Teensy 3.6 output) they draw 50mA each, so Teensy alone is sufficient to power them
-  const int duty_cycle_max = 255; // 100%
-  const int duty_cycle_80 = 204;  //  80%
-  const int duty_cycle_60 = 153;  //  60%
-  const int duty_cycle_40 = 102;  //  40%
+  // Activate only the one used
+  // const int duty_cycle_max = 255; // 100%
+  // const int duty_cycle_80 = 204;  //  80%
+  // const int duty_cycle_60 = 153;  //  60%
+  // const int duty_cycle_40 = 102;  //  40%
   const int duty_cycle_20 = 51;   //  20%
   const int duty_cycle_min = 0;   //   0%
 
