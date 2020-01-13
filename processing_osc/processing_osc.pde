@@ -5,14 +5,14 @@ import netP5.*;
 OscP5 oscP5;
 
 
-float ballPosition_x = -200;
+float ballPosition_x = 0;
 
 float angle = 0; //degrees
-
+float GRAVITY = 0.9801;
 
 
 void setup() {
-/* start oscP5 and listen for incoming messages at port 12000*/
+/* start oscP5 and listen for incoming messages at port 7777*/
   oscP5 = new OscP5(this,7777);
   println("so this is the setup\n");
   
@@ -51,7 +51,7 @@ void draw(){
   ellipse(ballPosition_x, -10, 20, 20);
  
   // increment x and y
-  //ballPosition_x+=2;
+  ballPosition_x += 9.81 * sin(radians(angle));
   
 }
 
@@ -64,11 +64,11 @@ void oscEvent(OscMessage theOscMessage) {
     if(theOscMessage.checkTypetag("f")) {
       float floatAngle = theOscMessage.get(0).floatValue();
       angle = floatAngle;
-      //println("the (float) angle is "+ floatAngle);
+      // println("the (float) angle is "+ floatAngle);
     } else if (theOscMessage.checkTypetag("i")) {
       int intAngle = theOscMessage.get(0).intValue();
       angle = intAngle;
-      //println("the (int) angle is "+ intAngle);
+      // println("the (int) angle is "+ intAngle);
     }
     println("the angle is "+ angle);
     
