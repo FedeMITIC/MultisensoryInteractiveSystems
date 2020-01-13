@@ -20,6 +20,8 @@
 #X msg 212 10 -20;
 #X msg 259 15 -15;
 #X msg 301 7 0;
+#X msg 375 11 90;
+#X msg 458 14 -90;
 #X connect 0 0 3 0;
 #X connect 1 0 0 0;
 #X connect 2 0 14 0;
@@ -37,3 +39,5 @@
 #X connect 17 0 2 0;
 #X connect 18 0 2 0;
 #X connect 19 0 2 0;
+#X connect 20 0 2 0;
+#X connect 21 0 2 0;

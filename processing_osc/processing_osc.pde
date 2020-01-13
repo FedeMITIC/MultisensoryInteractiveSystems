@@ -6,9 +6,14 @@ OscP5 oscP5;
 
 
 float ballPosition_x = 0;
-
+float prevBallPosition = 0;
 float angle = 0; //degrees
-float GRAVITY = 0.9801;
+
+// Constants
+final float GRAVITY = 9.82715;   // m/s^2 for Trento, Italy
+final int B_THRESHOLD = 10;        // Threshold for the boundary
+final int LEFT_BOUNDARY = -700 + B_THRESHOLD;
+final int RIGHT_BOUNDARY = 700 - B_THRESHOLD;
 
 
 void setup() {
@@ -16,7 +21,7 @@ void setup() {
   oscP5 = new OscP5(this,7777);
   println("so this is the setup\n");
   
-  size(600, 600, P2D);
+  size(1400, 800, P2D);
   
   // We could have used this function instead of size()
   // fullScreen(P2D);
@@ -35,23 +40,30 @@ void draw(){
   
   background(0);
   fill(250,250,250);  
- 
   
   //pushMatrix();
-  translate(300, 300); // (half board width, ...)
-  
-
+  translate(700, 400); // (half board width, ...)
   
   rotate(radians(angle)); // rotates the coordinate system by the angle received by pd
   //popMatrix();
   rectMode(CENTER);
-  rect(0, 400, 1200, 800); 
+  rect(0, 400, 1600, 800); 
   
   ellipseMode(CENTER); // ref. point to ellipse is its center
   ellipse(ballPosition_x, -10, 20, 20);
  
   // increment x and y
-  ballPosition_x += 9.81 * sin(radians(angle));
+  float acc = GRAVITY * sin(radians(angle));
+  
+  if (prevBallPosition + acc >= RIGHT_BOUNDARY || prevBallPosition + acc <= LEFT_BOUNDARY) { //<>//
+    // The ball will move out of boundary, so block it
+    ballPosition_x = prevBallPosition; //<>//
+  } else {
+    // The movement is OK, move the ball and save the original position for the next iteration
+    ballPosition_x += acc; //<>//
+    prevBallPosition = ballPosition_x; //<>//
+  }
+  
   
 }
 
@@ -71,6 +83,5 @@ void oscEvent(OscMessage theOscMessage) {
       // println("the (int) angle is "+ intAngle);
     }
     println("the angle is "+ angle);
-    
   }
 }
