@@ -17,7 +17,7 @@
 // #include <IIRFilter.h>
 #include <string.h>
 
-#define BAUD_RATE 115200 //NOTE: not used for Teensy (ignored)
+#define BAUD_RATE 9600 //NOTE: USB Speed (as reported by PD on my PC)
 
 /* Variables for incoming messages *************************************************************/
 
@@ -73,7 +73,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055(55); // Here set the ID. In this case it i
 */
 
 bool reset_calibration = false;  // set to true if you want to redo the calibration rather than using the values stored in the EEPROM
-bool display_BNO055_info = true; // set to true if you want to print on the serial port the infromation about the status and calibration of the IMU
+bool display_BNO055_info = false; // set to true if you want to print on the serial port the infromation about the status and calibration of the IMU
 
 /* Set the correction factors for the three Euler angles according to the wanted orientation */
 float  correction_x = 0; // -177.19;
@@ -350,9 +350,7 @@ void setup() {
     }
   }
   else{
-
     if(display_BNO055_info){  
-       
       Serial.println("\nFound Calibration for this sensor in EEPROM.");
     }
     
@@ -360,7 +358,6 @@ void setup() {
     EEPROM.get(eeAddress, calibrationData);
 
     if(display_BNO055_info){
-      
       displaySensorOffsets(calibrationData);
       Serial.println("\n\nRestoring Calibration data to the BNO055...");
     }
@@ -368,7 +365,6 @@ void setup() {
     bno.setSensorOffsets(calibrationData);
 
     if(display_BNO055_info){
-      
       Serial.println("\n\nCalibration data loaded into BNO055");
       delay(2000);
     }
@@ -424,7 +420,6 @@ void setup() {
       delay(3000);
       }
   }
-  Serial.println("Rotation_angle:"); 
 }
 
 
@@ -439,10 +434,8 @@ void loop() {
   /* Reads the data from the IMU BNO055 sensor only after the timeout. */
   if (micros() - BNO055_last_read >= BNO055_PERIOD_MICROSECS) {
     BNO055_last_read += BNO055_PERIOD_MICROSECS;
-    sensors_event_t orientationData, angVelData, linearAccelData;
+    sensors_event_t orientationData;
     bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
-    bno.getEvent(&angVelData, Adafruit_BNO055::VECTOR_GYROSCOPE);
-    bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
     /*
      Note:
      x = Yaw, y = Roll, z = pitch 
@@ -453,9 +446,7 @@ void loop() {
 
      We are interested only in the ROLL values (to determine the inclination angle of the bar)
     */ 
-    Serial.print("Rotation_angle:"); 
-    Serial.print(orientationData.orientation.y + correction_y);
-    Serial.println("");
+    Serial.println(orientationData.orientation.y + correction_y, 1);
   }
    
 }

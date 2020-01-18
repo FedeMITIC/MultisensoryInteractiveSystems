@@ -10,7 +10,7 @@ float prevBallPosition = 0;
 float angle = 0; //degrees
 
 // Constants
-final float GRAVITY = 9.82715;   // m/s^2 for Trento, Italy
+final float GRAVITY = 9.82715;     // m/s^2 for Trento, Italy
 final int B_THRESHOLD = 10;        // Threshold for the boundary
 final int LEFT_BOUNDARY = -700 + B_THRESHOLD;
 final int RIGHT_BOUNDARY = 700 - B_THRESHOLD;
@@ -69,7 +69,7 @@ void draw(){
 
 
 void oscEvent(OscMessage theOscMessage) {
-  
+  println(theOscMessage);
   if(theOscMessage.checkAddrPattern("/angle")) {
     //println("the field is there");
     //float angle = theOscMessage.get(0).floatValue();
