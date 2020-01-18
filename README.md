@@ -6,18 +6,27 @@
 - pd_osc: implementation of OSC messages in Pure Data, to communicate with Processing
 - processing_osc: implementation of the GUI to receive and parse OSC messages from Pure Data in Processing
 
-## Communication
+## Circuit design & components  
 
-Arduino communicates via the serial protocol to Pure Data ("duplex" mode: Arduino sends and receives data).  
-Pure Data communicates via OSC messages (using a local network or on localhost (127.0.0.1)) ("simplex" mode: Pure data only sends messages to Processing)
+The circuit is powered through a Teensy 3.6 via USB. Its power consumption had been estimated to be around 0.61W, considering wires and the breadboard as ideal components.  
 
-## Brief architecture setup
+It is based on the following main components:  
+1. 1 x Teensy 3.6  
+2. 1 x BNO055 IMU by Bosch  
+3. 2x 5mm Vibration Motor - 20mm Type (Model No. 304-116) by Precision Microdrives  
 
-Researchers' PC is connected directly to the circuit; runs Pure Data and the Arduino IDE to monitor the experiment, along with tools to record and evaluate the performance.  
-Users' PC displays the GUI, created by Processing; it is connected to the same network of the Researchers' PC.
+## Software Architecture
 
-## Resources
+The software is written using C++ for Teensy, Pure Data for Pure Data and Java (Processing) for Processing; the communication between the three languages is established with two channels:  
 
-Connection between Pure Data and Arduino realized using the Firmata Firmware and Pduino (@see https://museumexp.wordpress.com/2013/04/23/connecting-arduino-to-pd-pure-data)  
-Connection between Pure Data and Processing realized using oscP5 and netP5
+1. Feedforward channel: from Teensy to PD via USB Serial, from PD to Processing via the network interface (OSC Messages)
+2. Feedback    channel: -- UPDATE -- @see related issue
+
+## Test Setup
+
+The participant has a screen in front of them; this screen displays the virtual board and ball. The circuit, built on top of the wooden plank, is directly connected to the researcher's PC. 1 camera for recording the session is present. In addition to it, also the screens of the computers are recorded using screen capture tools.
+
+## Acknowledgements     
+
+Arduino2PD thanks to: http://hacklab.recyclism.com/workshops/arduino-to-pd-serial/  
 
