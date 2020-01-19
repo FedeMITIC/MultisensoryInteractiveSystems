@@ -23,10 +23,10 @@
 
 /*
  * Messages available
- * [motor1, 0]: switches OFF the motor on the left
- * [motor1, 1]: switches ON  the motor on the left
- * [motor2, 0]: switches OFF the motor on the right
- * [motor2, 1]: switches ON  the motor on the right
+ * [motor1,0]: switches OFF the motor on the left
+ * [motor1,1]: switches ON  the motor on the left
+ * [motor2,0]: switches OFF the motor on the right
+ * [motor2,1]: switches ON  the motor on the right
  * 
  * The first element always refer to the component, the second always refer to the state (ON/OFF)
  * "[" and "]" are the message delimiters, "0"s and "1"s are integers.
@@ -446,6 +446,7 @@ void loop() {
 
      We are interested only in the ROLL values (to determine the inclination angle of the bar)
     */ 
+    /* Print the value read on the serial with 1 decimal only */
     Serial.println(orientationData.orientation.y + correction_y, 1);
   }
    
