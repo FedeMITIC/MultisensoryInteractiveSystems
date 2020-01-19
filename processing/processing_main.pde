@@ -2,7 +2,10 @@ import controlP5.*;
 import oscP5.*;
 import netP5.*;
  
-OscP5 oscP5;
+// OSC Messages Setup
+NetAddress remote;   // Contains the object that sends the network messages
+OscP5 oscP5;         // Contains the object that listen to incoming messages
+
 
 float ballPosition_x = 0;
 float prevBallPosition = 0;
@@ -49,9 +52,11 @@ class Timer {
 Timer timer = new Timer(); 
 
 void setup() {
-/* start oscP5 and listen for incoming messages at port 7777*/
-  oscP5 = new OscP5(this,7777);
-  println("Connection Setup completed");
+  /* start oscP5 and listen for incoming messages at port 7777 */
+  oscP5 = new OscP5(this, 7777);
+  /* oscP5 to send messages to remote destination on port 7778 */
+  remote = new NetAddress("10.218.204.154", 7778);
+  println("Connection Setup completed: see details above.");
   
   size(1400, 800, P2D);
   smooth(3); // bicubic anti-aliasing
@@ -84,12 +89,12 @@ void draw(){
   rect(0, 400, 2000, 800); 
   
   ellipseMode(CENTER); // ref. point to ellipse is its center
-  ellipse(ballPosition_x, -10, BALL_DIM, BALL_DIM);
+  ellipse(ballPosition_x, -10, BALL_DIM, BALL_DIM); //<>//
   
   // To position the target and prepare the messages for PD
   switch(SCENARIO) {
     case 1: // Scenario 1: no feedback
-      fill(255, 0, 0);  // Red //<>//
+      fill(255, 0, 0);  // Red
       rect(TARGET_X, TARGET_Y, TARGET_DIM_L, 10);
       break;
     case 2: // Scenario 2: haptic feedback
