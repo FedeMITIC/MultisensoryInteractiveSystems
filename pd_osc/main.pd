@@ -1,0 +1,91 @@
+#N canvas 534 22 1277 844 10;
+#X obj 241 309 print ERROR;
+#X obj 130 276 convert.ascii2pd CR;
+#N canvas 712 205 905 623 in&out 0;
+#X obj 114 116 list-extend;
+#X obj 191 77 sel 10;
+#X msg 191 185 49 46 51 13;
+#X obj 190 157 prepend set;
+#X obj 193 236 gate;
+#X msg 126 209 0;
+#X msg 160 207 1;
+#X obj 116 30 inlet;
+#X obj 198 268 outlet;
+#X obj 87 80 route 10;
+#X connect 0 0 3 0;
+#X connect 1 0 0 1;
+#X connect 1 0 6 0;
+#X connect 1 0 2 0;
+#X connect 1 1 5 0;
+#X connect 2 0 4 1;
+#X connect 3 0 2 0;
+#X connect 4 0 8 0;
+#X connect 5 0 4 0;
+#X connect 6 0 4 0;
+#X connect 7 0 1 0;
+#X connect 7 0 9 0;
+#X connect 9 1 0 0;
+#X restore 130 239 pd in&out;
+#X msg 96 155 devices;
+#X text 159 155 < Click me to see what is connected to serial port
+;
+#X text 95 33 NOTE: You need to have the file convert.ascii2pd.pd in
+the same folder as this patch;
+#X obj 130 204 comport 5 9600;
+#X floatatom 33 312 5 0 0 0 - - -;
+#X obj 179 508 netsend -u -b;
+#X msg 197 438 disconnect;
+#X obj 179 565 tgl 15 0 empty empty 1=connected 20 8 0 8 -262144 -1
+-1 1 1;
+#X obj 33 444 prepend send;
+#X obj 33 354 prepend /angle;
+#X obj 33 509 prepend InputPack:;
+#X obj 33 398 packOSC;
+#X msg 179 406 connect 10.218.204.154 7777;
+#X text 229 210 Leave 9600 as baudrate;
+#X text 228 198 < change the numer 2 to the comport used by Teensy
+;
+#X text 93 15 Adatpted from Arduino 2 Pd - communication protocol by
+recyclism, f 68;
+#X text 94 64 Main Pure Data Patch Multisensory Interactive System
+- Federico Macchi | Nicola Baratella, f 72;
+#X text 93 117 Feedforward channel \; from Teensy 3.6 to Processing
+\, via USB Serial and OSC Messages, f 68;
+#X text 356 406 < Click me to connect to Processing;
+#X text 264 564 "Active" if the connection is successfull;
+#X msg 745 677 [motor1 \, 0];
+#X msg 831 677 [motor1 \, 1];
+#X msg 942 677 [motor2 \, 0];
+#X msg 1028 677 [motor2 \, 1];
+#X text 742 651 LEFT MOTOR Controls;
+#X text 938 651 RIGHT MOTOR Controls;
+#X text 743 628 MOTOR CONTROL PANEL;
+#X obj 765 404 unpackOSC;
+#X obj 768 441 routeOSC /angle;
+#X obj 698 156 netreceive -u -b 7777;
+#X obj 960 540 print;
+#X obj 1001 432 prepend OutputPack:;
+#X obj 748 487 prepend OutputAngle:;
+#X text 694 117 Feedback channel \; from Processing to Teensy 3.6 \,
+via OSC Messages and USB Serial, f 68;
+#X text 133 355 Prepare the message so that Processing can understand
+it;
+#X connect 1 0 7 0;
+#X connect 1 2 0 0;
+#X connect 2 0 1 0;
+#X connect 3 0 6 0;
+#X connect 6 0 2 0;
+#X connect 7 0 12 0;
+#X connect 8 0 10 0;
+#X connect 9 0 8 0;
+#X connect 11 0 8 0;
+#X connect 11 0 13 0;
+#X connect 12 0 14 0;
+#X connect 14 0 11 0;
+#X connect 15 0 8 0;
+#X connect 30 0 31 0;
+#X connect 31 0 35 0;
+#X connect 32 0 30 0;
+#X connect 32 0 34 0;
+#X connect 34 0 33 0;
+#X connect 35 0 33 0;
