@@ -3,8 +3,8 @@
 ## Repository Structure
 
 - arduino_code/arduino_code.ino: contains the code used to read data from the sensors and receive messages from PureData to control the actuators.
-- pd_osc: implementation of OSC messages in Pure Data, to communicate with Processing
-- processing_osc: implementation of the GUI to receive and parse OSC messages from Pure Data in Processing
+- pd: implementation of OSC messages in Pure Data, to communicate with Processing
+- processing: implementation of the GUI to receive and parse OSC messages from Pure Data in Processing
 
 ## Circuit design & components  
 
