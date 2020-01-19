@@ -7,8 +7,9 @@ OscP5 oscP5;
 float ballPosition_x = 0;
 float prevBallPosition = 0;
 float angle = 0; //degrees
-boolean experimentStarted = false;
-boolean experimentCompleted = false; // Used to block.
+boolean experimentStarted = false;  // Used to start the timer
+boolean experimentCompleted = false; // Used to stop the timer
+boolean flag = false; // Used to pretty print the output
 boolean isInTargetArea = false;  // Check if the ball is in the target area
 
 // Constants
@@ -70,7 +71,7 @@ void draw(){
   //pushMatrix();
   translate(700, 400); // (half board width, ...)
   
-  if(!experimentStarted) {
+  if(!experimentStarted && !experimentCompleted) {
     String t = "WELCOME TO SCENARIO " + SCENARIO;
     textSize(24);
     text(t, -650, -350);
@@ -88,8 +89,8 @@ void draw(){
   // To position the target and prepare the messages for PD
   switch(SCENARIO) {
     case 1: // Scenario 1: no feedback
-      fill(255, 0, 0);  // Red
-      rect(TARGET_X, TARGET_Y, TARGET_DIM_L, 10); //<>//
+      fill(255, 0, 0);  // Red //<>//
+      rect(TARGET_X, TARGET_Y, TARGET_DIM_L, 10);
       break;
     case 2: // Scenario 2: haptic feedback
       break;
@@ -137,8 +138,11 @@ void oscEvent(OscMessage theOscMessage) {
   if(experimentCompleted) {
     timer.stop();
     int elapsedTime = timer.getElapsedTime();
-    println("[", SCENARIO, "]", "Experiment completed");
-    println("[", SCENARIO, "]", "Elapsed time: ", elapsedTime, "ms", "(", ((float)elapsedTime / 1000) % 60, ")");
+    if(!flag) {
+      print("[", SCENARIO, "]", "Experiment completed. ");
+      println("Elapsed time: ", elapsedTime, "ms", "(", ((float)elapsedTime / 1000) % 60, "s )");
+      flag = true;
+    }
     // 3 seconds delay before quitting the UI (remove to calculate the exact experiment time)
     delay(3000);
     exit();
@@ -150,7 +154,7 @@ void oscEvent(OscMessage theOscMessage) {
       angle = floatAngle;
       // If the experimented is not yet started and the angle is not 0°, then the user tilted the plank for the first time 
       if(!experimentStarted && !isZero(angle)) {
-        println("[", SCENARIO, "]", "Experiment started");
+        println("[", SCENARIO, "]", "Experiment started.");
         experimentStarted = true;
         timer.start();
       }
