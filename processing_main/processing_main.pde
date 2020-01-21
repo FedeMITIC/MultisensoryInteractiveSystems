@@ -9,7 +9,7 @@ OscP5 oscP5;         // Contains the object that listen to incoming messages
 
 float ballPosition_x = 0;
 float prevBallPosition = 0;
-float angle = 0; //degrees
+float angle = 0; //radians
 boolean experimentStarted = false;  // Used to start the timer
 boolean experimentCompleted = false; // Used to stop the timer
 boolean flag = false; // Used to pretty print the output
@@ -20,7 +20,7 @@ final float GRAVITY = 9.82715;     // m/s^2 for Trento, Italy
 final int B_THRESHOLD = 10;        // Threshold for the boundary
 final int LEFT_BOUNDARY = -700 + B_THRESHOLD;
 final int RIGHT_BOUNDARY = 700 - B_THRESHOLD;
-final float ANGLE_ZERO_THRESHOLD = 2.5;
+final float ANGLE_ZERO_THRESHOLD = 0.04363323129985824;
 final float MASS = 1;
 
 
@@ -85,7 +85,7 @@ void draw(){
     text("Tilt the board to start the experiment", -650, -320);
   }
   
-  rotate(radians(angle)); // rotates the coordinate system by the angle received by pd
+  rotate(angle); // rotates the coordinate system by the angle received by pd
   rectMode(CENTER);
   rect(0, 400, 2000, 800); 
   
@@ -109,7 +109,7 @@ void draw(){
   }
  
   // increment x and y
-  float acc = MASS * GRAVITY * sin(radians(angle));
+  float acc = MASS * GRAVITY * sin(angle);
   
   if (prevBallPosition + acc >= RIGHT_BOUNDARY || prevBallPosition + acc <= LEFT_BOUNDARY) {
     // The ball will move out of boundary, so block it

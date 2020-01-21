@@ -1,4 +1,4 @@
-#N canvas 832 23 603 615 10;
+#N canvas 455 126 603 615 10;
 #X msg 186 399 44 32;
 #X text 185 379 space and comma;
 #X obj 22 179 cyclone/sprintf print [%s;

@@ -1,10 +1,10 @@
-#N canvas 274 32 1562 844 10;
-#X obj 241 309 print ERROR;
+#N canvas 168 51 1562 844 10;
+#X obj 241 325 print ERROR;
 #X obj 130 276 convert.ascii2pd CR;
 #N canvas 712 205 905 623 in&out 0;
 #X obj 114 116 list-extend;
 #X obj 191 77 sel 10;
-#X msg 191 185 48 46 54 13;
+#X msg 191 185 49 46 56 13;
 #X obj 190 157 prepend set;
 #X obj 193 236 gate;
 #X msg 126 209 0;
@@ -32,15 +32,15 @@
 #X text 95 33 NOTE: You need to have the file convert.ascii2pd.pd in
 the same folder as this patch;
 #X obj 130 204 comport 5 9600;
-#X floatatom 33 312 5 0 0 0 - - -;
-#X obj 179 508 netsend -u -b;
-#X msg 197 438 disconnect;
-#X obj 179 565 tgl 15 0 empty empty 1=connected 20 8 0 8 -262144 -1
+#X floatatom 33 373 5 0 0 0 - - -;
+#X obj 179 572 netsend -u -b;
+#X msg 197 530 disconnect;
+#X obj 179 613 tgl 15 0 empty empty 1=connected 20 8 0 8 -262144 -1
 -1 0 1;
-#X obj 33 444 prepend send;
-#X obj 33 354 prepend /angle;
-#X obj 33 398 packOSC;
-#X msg 179 406 connect 10.218.204.154 7777;
+#X obj 33 536 prepend send;
+#X obj 33 446 prepend /angle;
+#X obj 33 474 packOSC;
+#X msg 179 498 connect 10.218.204.154 7777;
 #X text 229 210 Leave 9600 as baudrate;
 #X text 228 198 < change the numer 2 to the comport used by Teensy
 ;
@@ -50,47 +50,86 @@ recyclism, f 68;
 - Federico Macchi | Nicola Baratella, f 91;
 #X text 93 117 Feedforward channel \; from Teensy 3.6 to Processing
 \, via USB Serial and OSC Messages, f 68;
-#X text 356 406 < Click me to connect to Processing;
-#X text 264 564 "Active" if the connection is successfull;
-#X text 133 355 Prepare the message so that Processing can understand
+#X text 356 499 < Click me to connect to Processing;
+#X text 264 572 "Active" if the connection is successfull;
+#X text 133 447 Prepare the message so that Processing can understand
 it;
-#X msg 94 310 10;
-#X obj 704 404 _format_serial_messages;
-#X msg 908 283 motor1_pattern1 \$1;
-#X msg 908 250 0;
-#X msg 955 251 1;
-#X obj 704 432 s to_arduino;
-#X text 1066 275 The Arduino sketch handles messages for the motors
+#X obj 716 687 _format_serial_messages;
+#X msg 762 491 0;
+#X obj 716 715 s to_arduino;
+#X text 920 516 The Arduino sketch handles messages for the motors
 that are either 0 or 1: these correspond to the motor off and on;
-#X msg 909 334 0;
-#X msg 956 335 1;
-#X text 1067 359 The Arduino sketch handles messages for the motors
+#X msg 763 622 0;
+#X text 921 647 The Arduino sketch handles messages for the motors
 that are either 0 or 1: these correspond to the motor off and on;
-#X msg 909 368 motor1_pattern2 \$1;
-#X text 694 117 Feedback channel \; from PD to Teensy 3.6 \, via USB
-Serial, f 68;
-#X text 696 162 Motors control panel Duty cycles, f 26;
-#X text 905 230 OFF, f 4;
-#X text 905 315 OFF, f 4;
-#X text 953 315 ON, f 4;
-#X text 953 230 ON, f 4;
+#X msg 763 656 motor1_pattern2 \$1;
+#X text 686 374 Feedback channel \; from PD to Teensy 3.6 \, via USB
+Serial, f 41;
+#X text 759 471 OFF, f 4;
+#X text 759 603 OFF, f 4;
+#X msg 762 524 motor1_pattern1 \$1;
+#X text 855 584 DUTY CYCLES, f 12;
+#X msg 857 623 26;
+#X msg 944 623 26;
+#X msg 899 623 51;
+#X msg 986 624 102;
+#X msg 1127 624 204;
+#X text 855 602 10%, f 4;
+#X text 896 602 20%, f 4;
+#X text 984 603 40%, f 4;
+#X text 1124 603 80%, f 4;
+#X text 941 602 30%, f 4;
+#X msg 1035 624 128;
+#X text 1030 603 50%, f 4;
+#X text 1078 603 60%, f 4;
+#X msg 1081 624 153;
+#X msg 1172 624 229;
+#X text 1169 602 <90%;
+#X text 859 453 DUTY CYCLES, f 12;
+#X msg 861 492 26;
+#X msg 948 492 26;
+#X msg 903 492 51;
+#X msg 990 493 102;
+#X msg 1131 493 204;
+#X text 859 471 10%, f 4;
+#X text 900 471 20%, f 4;
+#X text 988 472 40%, f 4;
+#X text 1128 472 80%, f 4;
+#X text 945 471 30%, f 4;
+#X msg 1039 493 128;
+#X text 1034 472 50%, f 4;
+#X text 1082 472 60%, f 4;
+#X msg 1085 493 153;
+#X msg 1176 493 229;
+#X text 1173 471 <90%;
+#X text 688 410 Motors control panel: Motors can be controlled indipendently
+using the duty cycles, f 111;
+#X msg 1100 152 9.82715;
+#X msg 1178 151 1;
+#X text 685 112 Physics constants, f 18;
+#X text 1096 133 Gravity, f 8;
+#X text 1176 133 Mass, f 6;
+#X obj 1100 210 *;
+#X obj 33 416 *;
+#X msg 131 373 0.0174533;
+#X text 129 355 PI / 180 for the conversion to radians;
 #X connect 1 0 7 0;
 #X connect 1 2 0 0;
 #X connect 2 0 1 0;
 #X connect 3 0 6 0;
 #X connect 6 0 2 0;
-#X connect 7 0 12 0;
+#X connect 7 0 75 0;
 #X connect 8 0 10 0;
 #X connect 9 0 8 0;
 #X connect 11 0 8 0;
 #X connect 12 0 13 0;
 #X connect 13 0 11 0;
 #X connect 14 0 8 0;
-#X connect 23 0 12 0;
-#X connect 24 0 28 0;
-#X connect 25 0 24 0;
-#X connect 26 0 25 0;
-#X connect 27 0 25 0;
-#X connect 30 0 33 0;
-#X connect 31 0 33 0;
-#X connect 33 0 24 0;
+#X connect 23 0 25 0;
+#X connect 24 0 33 0;
+#X connect 27 0 29 0;
+#X connect 29 0 23 0;
+#X connect 33 0 23 0;
+#X connect 69 0 74 0;
+#X connect 75 0 12 0;
+#X connect 76 0 75 1;
