@@ -12,12 +12,10 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
-// #include <utility/imumaths.h>
 #include <EEPROM.h>
-// #include <IIRFilter.h>
 #include <string.h>
 
-#define BAUD_RATE 9600 //NOTE: USB Speed (as reported by PD on my PC)
+#define BAUD_RATE 9600 //NOTE: Teensy uses full USB speed, however, in this way the communication with PD works...
 
 /* Variables for incoming messages *************************************************************/
 
@@ -235,7 +233,7 @@ void receive_message() {
 }
 
 void handle_received_message(char *received_message) {
-  char *all_tokens[2]; //NOTE: the message is composed by 2 tokens: command and value
+  char *all_tokens[2]; //NOTE: the message is composed by 2 tokens: command and value (in range [0, 255] represents the duty cycle)
   const char delimiters[5] = {START_MARKER, ',', ' ', END_MARKER,'\0'};
   int i = 0;
 
@@ -245,14 +243,10 @@ void handle_received_message(char *received_message) {
   // the maximum duty cycle is duty_cycle_60 (3V/5V = 0,6 = 60%)
 
   // Red small motors: https://www.precisionmicrodrives.com/product/304-116-5mm-vibration-motor-20mm-type
-  // Teensy outputs around 100mA current, and those motors draw at most 55/60mA each; at 3.3V (Teensy 3.6 output) they draw 50mA each, so Teensy alone is sufficient to power them
-  // Activate only the one used
-  // const int duty_cycle_max = 255; // 100%
-  // const int duty_cycle_80 = 204;  //  80%
-  // const int duty_cycle_60 = 153;  //  60%
-  // const int duty_cycle_40 = 102;  //  40%
-  const int duty_cycle_20 = 51;   //  20%
-  const int duty_cycle_min = 0;   //   0%
+  // Teensy outputs around 100mA current, and those motors draw at most 55/60mA each; at 3.3V (Teensy 3.6 standard voltage output) they draw 50mA each, so Teensy alone is sufficient to power them at 100% DC
+  // However, since we don't need 100% anyway, we set the max safe duty cycle to be 90%
+  const int max_safe_dc = 229;  // 90%
+  const int off = 0;            //  0%
 
   all_tokens[i] = strtok(received_message, delimiters);
   
@@ -260,28 +254,28 @@ void handle_received_message(char *received_message) {
     all_tokens[++i] = strtok(NULL, delimiters);
   }
 
-  char *command = all_tokens[0]; 
+  char *command = all_tokens[0];
   char *value = all_tokens[1];
-
-
-  if (strcmp(command,"motor1") == 0 && strcmp(value,"1") == 0) {
-    Serial.println("MOTOR 1 (left) ON ");
-    analogWrite(motor_left, duty_cycle_20);
-  }
+  // Converts the value into an integer (by parsing the string, removes also all the other unnecessary characters
+  int val = atoi(value);
   
-  if (strcmp(command,"motor1") == 0 && strcmp(value,"0") == 0) {
-    Serial.println("MOTOR 1 (left) OFF ");
-    analogWrite(motor_left, duty_cycle_min);
+  // Check that the value received is in our safe interval
+  // If it's negative, set it to 0
+  if (val < off) {
+      val = off;
+  }
+  // If it's greater then the max safe duty cycle, lower it to that value
+  if (val > max_safe_dc) {
+      val = max_safe_dc;
   }
 
-  if (strcmp(command,"motor2") == 0 && strcmp(value,"1") == 0) {
-    Serial.println("MOTOR 2 (right) ON ");
-    analogWrite(motor_right, duty_cycle_20);       
+  // Motor 1 = motor on the left
+  if (strcmp(command, "motor1") == 0) {
+    analogWrite(motor_left, val);
   }
-  
-  if (strcmp(command,"motor2") == 0 && strcmp(value,"0") == 0) {
-    Serial.println("MOTOR 2 (right) OFF ");
-    analogWrite(motor_right, duty_cycle_min);
+
+  if (strcmp(command, "motor2") == 0) {
+    analogWrite(motor_right, val);
   }
 } 
 
