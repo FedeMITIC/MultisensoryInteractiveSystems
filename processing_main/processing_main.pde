@@ -21,6 +21,7 @@ final int B_THRESHOLD = 10;        // Threshold for the boundary
 final int LEFT_BOUNDARY = -700 + B_THRESHOLD;
 final int RIGHT_BOUNDARY = 700 - B_THRESHOLD;
 final float ANGLE_ZERO_THRESHOLD = 2.5;
+final float MASS = 1;
 
 
 final int SCENARIO = 1;
@@ -56,7 +57,7 @@ void setup() {
   oscP5 = new OscP5(this, 7777);
   /* oscP5 to send messages to remote destination on port 7778 */
   remote = new NetAddress("10.218.204.154", 7778);
-  println("Connection Setup completed: see details above.");
+  println("Connection setup completed: see details above.");
   
   size(1400, 800, P2D);
   smooth(3); // bicubic anti-aliasing
@@ -108,7 +109,7 @@ void draw(){
   }
  
   // increment x and y
-  float acc = GRAVITY * sin(radians(angle));
+  float acc = MASS * GRAVITY * sin(radians(angle));
   
   if (prevBallPosition + acc >= RIGHT_BOUNDARY || prevBallPosition + acc <= LEFT_BOUNDARY) {
     // The ball will move out of boundary, so block it
@@ -139,6 +140,7 @@ boolean isZero(float n) {
  * The angle received is always a float with one decimal
  */
 void oscEvent(OscMessage theOscMessage) {
+  println(theOscMessage.get(0).floatValue());
   // If the experiment is completed, close the interface
   if(experimentCompleted) {
     timer.stop();
