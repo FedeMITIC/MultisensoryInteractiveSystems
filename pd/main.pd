@@ -1,10 +1,10 @@
-#N canvas 204 51 1562 844 10;
+#N canvas 198 21 1562 844 10;
 #X obj 424 549 print ERROR;
 #X obj 313 500 convert.ascii2pd CR;
 #N canvas 712 205 905 623 in&out 0;
 #X obj 114 116 list-extend;
 #X obj 191 77 sel 10;
-#X msg 191 185 45 48 46 49 50 53 13;
+#X msg 191 185 48 46;
 #X obj 190 157 prepend set;
 #X obj 193 236 gate;
 #X msg 126 209 0;
