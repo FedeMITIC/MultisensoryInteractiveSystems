@@ -21,10 +21,7 @@
 
 /*
  * Messages available
- * [motor1,0]: switches OFF the motor on the left
- * [motor1,1]: switches ON  the motor on the left
- * [motor2,0]: switches OFF the motor on the right
- * [motor2,1]: switches ON  the motor on the right
+ * [motor.value]: activates the motor, with "value" duty cycle [0=OFF, 255=MAX]
  * 
  * The first element always refer to the component, the second always refer to the state (ON/OFF)
  * "[" and "]" are the message delimiters, "0"s and "1"s are integers.
@@ -234,7 +231,7 @@ void receive_message() {
 
 void handle_received_message(char *received_message) {
   char *all_tokens[2]; //NOTE: the message is composed by 2 tokens: command and value (in range [0, 255] represents the duty cycle)
-  const char delimiters[5] = {START_MARKER, ',', ' ', END_MARKER,'\0'};
+  const char delimiters[5] = {START_MARKER, '.', ' ', END_MARKER,'\0'};
   int i = 0;
 
   // @see https://www.arduino.cc/reference/en/language/functions/analog-io/analogwrite/

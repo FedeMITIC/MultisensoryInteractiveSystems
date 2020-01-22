@@ -31,7 +31,14 @@ final float MIN_PWR = 25.0;   // 10% DC
 final int OFF = 0;        //  0% DC
 final float LIN_SCALE = 0.191;  // Linear scale to map the distance of the ball (0,650] and the power of the motor [0,229]
 
-final int SCENARIO = 2;
+
+
+/* UPDATE THESE VARIABLES ACCORDINGLY */
+final int SCENARIO = 2;                   // Scenario to execute
+final String USR_NAME = "Federico";       // ID of the User (String)
+final String REMOTE_ADDR = "127.0.0.1";   // Remote address (if using different PCs)
+
+
 final int BALL_DIM = 20;
 final int TARGET_X = 500;
 final int TARGET_Y = 4;
@@ -63,7 +70,7 @@ void setup() {
   /* start oscP5 and listen for incoming messages at port 7777 */
   oscP5 = new OscP5(this, 7777);
   /* oscP5 to send messages to remote destination on port 7778 */
-  remote = new NetAddress("10.218.204.154", 7778);
+  remote = new NetAddress(REMOTE_ADDR, 7778);
   println("Connection setup completed: see details above.");
   
   size(1400, 800, P2D);
@@ -112,8 +119,17 @@ void draw(){
           motor_message.clear();
           motor_message = new OscMessage("/motor"); 
           float pwr = applyThreshold(generateLinearScale());  // Remove apply threshold to obtain the real values (instead of the one in the interval 10%-90% DC)
-          String motor_command = "[motor,";
+          String motor_command = "[motor.";
           motor_command += (int)pwr;  // Arduino expects an integer.
+          motor_command += "]";
+          motor_message.add(motor_command);
+          oscP5.send(motor_message, remote);
+        }
+        if (experimentCompleted) {
+          motor_message.clear();
+          motor_message = new OscMessage("/motor"); 
+          String motor_command = "[motor.";
+          motor_command += 0;  // Arduino expects an integer.
           motor_command += "]";
           motor_message.add(motor_command);
           oscP5.send(motor_message, remote);
@@ -162,7 +178,7 @@ boolean isZero(float n) {
 float generateLinearScale() {
   // If the ball is in the target area, turn off both motors and return
   if (isInTargetArea) {
-    return 0;
+    return MAX_PWR;
   }
   int distance = 0;
   float pwr = 0;

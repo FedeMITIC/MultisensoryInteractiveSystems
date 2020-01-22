@@ -1,10 +1,10 @@
-#N canvas 319 56 1562 844 10;
-#X obj 241 325 print ERROR;
-#X obj 130 276 convert.ascii2pd CR;
+#N canvas 204 51 1562 844 10;
+#X obj 424 549 print ERROR;
+#X obj 313 500 convert.ascii2pd CR;
 #N canvas 712 205 905 623 in&out 0;
 #X obj 114 116 list-extend;
 #X obj 191 77 sel 10;
-#X msg 191 185 48 46 53 54 51 13;
+#X msg 191 185 45 48 46 49 50 53 13;
 #X obj 190 157 prepend set;
 #X obj 193 236 gate;
 #X msg 126 209 0;
@@ -25,130 +25,77 @@
 #X connect 7 0 1 0;
 #X connect 7 0 9 0;
 #X connect 9 1 0 0;
-#X restore 130 239 pd in&out;
-#X msg 96 155 devices;
-#X text 159 155 < Click me to see what is connected to serial port
+#X restore 313 463 pd in&out;
+#X msg 313 352 devices;
+#X text 366 353 < Click me to see what is connected to serial port
 ;
-#X text 95 33 NOTE: You need to have the file convert.ascii2pd.pd in
-the same folder as this patch;
-#X obj 130 204 comport 5 9600;
-#X floatatom 33 373 5 0 0 0 - - -;
-#X obj 179 572 netsend -u -b;
-#X msg 197 530 disconnect;
-#X obj 179 613 tgl 15 0 empty empty 1=connected 20 8 0 8 -262144 -1
+#X text 100 33 NOTE: You need to have the file convert.ascii2pd.pd
+in the same folder as this patch;
+#X obj 313 428 comport 5 9600;
+#X floatatom 216 597 5 0 0 0 - - -;
+#X obj 362 796 netsend -u -b;
+#X msg 380 754 disconnect;
+#X obj 362 837 tgl 15 0 empty empty 1=connected 20 8 0 8 -262144 -1
 -1 0 1;
-#X obj 33 536 prepend send;
-#X obj 33 446 prepend /angle;
-#X obj 33 474 packOSC;
-#X msg 179 498 connect 10.218.204.154 7777;
-#X text 229 210 Leave 9600 as baudrate;
-#X text 228 198 < change the numer 2 to the comport used by Teensy
-;
-#X text 93 15 Adatpted from Arduino 2 Pd - communication protocol by
+#X obj 216 760 prepend send;
+#X obj 216 670 prepend /angle;
+#X obj 216 698 packOSC;
+#X text 412 434 Leave 9600 as baudrate;
+#X text 98 15 Adatpted from Arduino 2 Pd - communication protocol by
 recyclism, f 68;
-#X text 94 64 Main Pure Data Patch Multisensory Interactive System
+#X text 99 64 Main Pure Data Patch Multisensory Interactive System
 - Federico Macchi | Nicola Baratella, f 91;
-#X text 93 117 Feedforward channel \; from Teensy 3.6 to Processing
+#X text 276 317 Feedforward channel \; from Teensy 3.6 to Processing
 \, via USB Serial and OSC Messages, f 68;
-#X text 356 499 < Click me to connect to Processing;
-#X text 264 572 "Active" if the connection is successfull;
-#X text 133 447 Prepare the message so that Processing can understand
+#X text 539 723 < Click me to connect to Processing;
+#X text 447 796 "Active" if the connection is successfull;
+#X text 316 671 Prepare the message so that Processing can understand
 it;
-#X obj 716 687 _format_serial_messages;
-#X msg 762 491 0;
-#X obj 716 715 s to_arduino;
-#X text 920 516 The Arduino sketch handles messages for the motors
-that are either 0 or 1: these correspond to the motor off and on;
-#X msg 763 622 0;
-#X text 921 647 The Arduino sketch handles messages for the motors
-that are either 0 or 1: these correspond to the motor off and on;
-#X msg 763 656 motor1_pattern2 \$1;
-#X text 686 374 Feedback channel \; from PD to Teensy 3.6 \, via USB
+#X text 99 102 Feedback channel \; from PD to Teensy 3.6 \, via USB
 Serial, f 41;
-#X text 759 471 OFF, f 4;
-#X text 759 603 OFF, f 4;
-#X msg 762 524 motor1_pattern1 \$1;
-#X text 855 584 DUTY CYCLES, f 12;
-#X msg 857 623 26;
-#X msg 944 623 26;
-#X msg 899 623 51;
-#X msg 986 624 102;
-#X msg 1127 624 204;
-#X text 855 602 10%, f 4;
-#X text 896 602 20%, f 4;
-#X text 984 603 40%, f 4;
-#X text 1124 603 80%, f 4;
-#X text 941 602 30%, f 4;
-#X msg 1035 624 128;
-#X text 1030 603 50%, f 4;
-#X text 1078 603 60%, f 4;
-#X msg 1081 624 153;
-#X msg 1172 624 229;
-#X text 1169 602 <90%;
-#X text 859 453 DUTY CYCLES, f 12;
-#X msg 861 492 26;
-#X msg 948 492 26;
-#X msg 903 492 51;
-#X msg 990 493 102;
-#X msg 1131 493 204;
-#X text 859 471 10%, f 4;
-#X text 900 471 20%, f 4;
-#X text 988 472 40%, f 4;
-#X text 1128 472 80%, f 4;
-#X text 945 471 30%, f 4;
-#X msg 1039 493 128;
-#X text 1034 472 50%, f 4;
-#X text 1082 472 60%, f 4;
-#X msg 1085 493 153;
-#X msg 1176 493 229;
-#X text 1173 471 <90%;
-#X text 688 410 Motors control panel: Motors can be controlled indipendently
-using the duty cycles, f 111;
-#X msg 1100 152 9.82715;
-#X msg 1178 151 1;
-#X text 685 112 Physics constants, f 18;
-#X text 1096 133 Gravity, f 8;
-#X text 1176 133 Mass, f 6;
-#X obj 1100 210 *;
-#X obj 33 416 *;
-#X msg 131 373 0.0174533;
-#X text 129 355 PI / 180 for the conversion to radians;
-#X text 201 374 CLICK ME BEFORE CONNECTING!;
-#X obj 1642 439 routeOSC /angle;
-#X obj 1834 538 print;
-#X obj 1875 430 prepend OutputPack:;
-#X obj 1622 485 prepend OutputAngle:;
-#X obj 698 212 unpackOSC;
-#X obj 754 152 netreceive -u -b 7778;
-#X obj 698 262 routeOSC /motor;
-#X obj 693 321 s to_arduino;
-#X obj 485 335 print;
-#X obj 492 297 cyclone/sprintf %s;
+#X obj 216 640 *;
+#X msg 314 597 0.0174533;
+#X text 312 579 PI / 180 for the conversion to radians;
+#X text 384 598 CLICK ME BEFORE CONNECTING!;
+#X obj 101 173 unpackOSC;
+#X obj 101 142 netreceive -u -b 7778;
+#X obj 101 236 routeOSC /motor;
+#X msg 365 401 close;
+#X msg 364 377 open 5;
+#X text 411 422 < change the number "5" to the comport used by Teensy
+;
+#X msg 362 722 connect 127.0.0.1 7777;
+#X msg 131 317 set print \$1;
+#X obj 131 284 list;
+#X msg 101 364 print [motor.0], f 24;
+#X obj 101 299 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 49 467 cnv 15 200 60 empty empty empty 20 12 0 14 -260097 -262144
+0;
+#X msg 75 497 print [motor.0], f 24;
+#X text 74 477 EMERGENCY STOP FOR MOTORS, f 26;
 #X connect 1 0 7 0;
 #X connect 1 2 0 0;
 #X connect 2 0 1 0;
 #X connect 3 0 6 0;
 #X connect 6 0 2 0;
-#X connect 7 0 75 0;
+#X connect 7 0 22 0;
 #X connect 8 0 10 0;
 #X connect 9 0 8 0;
 #X connect 11 0 8 0;
 #X connect 12 0 13 0;
 #X connect 13 0 11 0;
-#X connect 14 0 8 0;
-#X connect 23 0 25 0;
-#X connect 24 0 33 0;
-#X connect 27 0 29 0;
-#X connect 29 0 23 0;
-#X connect 33 0 23 0;
-#X connect 69 0 74 0;
-#X connect 75 0 12 0;
-#X connect 76 0 75 1;
-#X connect 79 0 82 0;
-#X connect 81 0 80 0;
-#X connect 82 0 80 0;
-#X connect 83 0 85 0;
-#X connect 84 0 83 0;
-#X connect 85 0 88 0;
-#X connect 88 0 87 0;
-#X connect 88 0 86 0;
+#X connect 22 0 12 0;
+#X connect 23 0 22 1;
+#X connect 26 0 28 0;
+#X connect 27 0 26 0;
+#X connect 28 0 34 0;
+#X connect 28 0 36 0;
+#X connect 29 0 6 0;
+#X connect 30 0 6 0;
+#X connect 32 0 8 0;
+#X connect 33 0 35 0;
+#X connect 34 0 33 0;
+#X connect 35 0 6 0;
+#X connect 36 0 35 0;
+#X connect 38 0 6 0;
