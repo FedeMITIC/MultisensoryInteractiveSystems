@@ -1,6 +1,8 @@
 import controlP5.*; 
 import oscP5.*;
 import netP5.*;
+import java.io.FileWriter;
+import java.io.*;
  
 // OSC Messages Setup
 NetAddress remote;   // Contains the object that sends the network messages
@@ -64,7 +66,12 @@ class Timer {
   }
 }
 
-Timer timer = new Timer(); 
+// For the log file
+Timer timer = new Timer();
+PrintWriter f_output;
+
+// Change this to the desired output folder
+final String FILENAME = "C:/Users/FEDEM/Desktop/log.txt";
 
 void setup() {
   /* start oscP5 and listen for incoming messages at port 7777 */
@@ -72,6 +79,21 @@ void setup() {
   /* oscP5 to send messages to remote destination on port 7778 */
   remote = new NetAddress(REMOTE_ADDR, 7778);
   println("Connection setup completed: see details above.");
+  try {
+    File file = new File(FILENAME);
+    // If the file does not exists, creates it
+    if (!file.exists()) {
+      file.createNewFile();
+    }
+    FileWriter fw = new FileWriter(file, true);  //true = append
+    BufferedWriter bw = new BufferedWriter(fw);
+    f_output = new PrintWriter(bw);
+    f_output.write("\n[" + getFullDate() + "] " + "User " + USR_NAME + " started Scenario " + SCENARIO + "\n");
+  } catch(IOException e) {
+    println("Error creating/opening file, maybe the path is incorrect...");
+    println("Impossible to continue");
+    exit();
+  }
   
   size(1400, 800, P2D);
   smooth(3); // bicubic anti-aliasing
@@ -162,6 +184,16 @@ void draw(){
   }
 }
 
+float applyThreshold(float n) {
+  if (n < MIN_PWR) {
+    return MIN_PWR;
+  }
+  if (n > MAX_PWR) {
+    return MAX_PWR;
+  }
+  return n;
+}
+
 void checkTarget() {
   if ((int)ballPosition_x + BALL_DIM >= TARGET_X && (int)ballPosition_x + BALL_DIM <= TARGET_X + TARGET_DIM_L) {
     // The virtual ball is inside the target; the experiment is completed if it stays there
@@ -169,10 +201,6 @@ void checkTarget() {
   } else {
     isInTargetArea = false;
   }
-}
-
-boolean isZero(float n) {
-  return (n >= -ANGLE_ZERO_THRESHOLD && n <= ANGLE_ZERO_THRESHOLD);
 }
 
 float generateLinearScale() {
@@ -193,14 +221,27 @@ float generateLinearScale() {
   return pwr;
 }
 
-float applyThreshold(float n) {
-  if (n < MIN_PWR) {
-    return MIN_PWR;
-  }
-  if (n > MAX_PWR) {
-    return MAX_PWR;
-  }
-  return n;
+// Returns the time in the format hh:mm:ss
+String getCurrTime() {
+  int s = second();
+  int m = minute();
+  int h = hour();
+  return String.valueOf(h) + ":" + String.valueOf(m) + ":" + String.valueOf(s);
+}
+
+// Returns the date in the format dd/mm/yyyy - hh:mm:ss
+String getFullDate() {
+  int s = second();
+  int m = minute();
+  int h = hour();  
+  int d = day();
+  int mo = month();
+  int y = year();
+  return String.valueOf(d) + "/" + String.valueOf(mo) + "/" + String.valueOf(y) + " - " + String.valueOf(h) + ":" + String.valueOf(m) + ":" + String.valueOf(s);
+}
+
+boolean isZero(float n) {
+  return (n >= -ANGLE_ZERO_THRESHOLD && n <= ANGLE_ZERO_THRESHOLD);
 }
 
 /*
@@ -209,15 +250,17 @@ float applyThreshold(float n) {
 void oscEvent(OscMessage theOscMessage) {
   // If the experiment is completed, close the interface
   if(experimentCompleted) {
-    timer.stop();
     int elapsedTime = timer.getElapsedTime();
     if(!flag) {
       print("[", SCENARIO, "]", "Experiment completed. ");
       println("Elapsed time: ", elapsedTime, "ms", "(", ((float)elapsedTime / 1000) % 60, "s )");
+      f_output.write("[" + getCurrTime() + "] " + "User " + USR_NAME + " completed scenario " + SCENARIO + ". Total time: " + elapsedTime + "ms" + " (" + ((float)elapsedTime / 1000) % 60 + "s)" + "\n");
+      f_output.close();  // Close the file to release resources
       flag = true;
     }
-    // 3 seconds delay before quitting the UI (remove to calculate the exact experiment time)
+    // 3 seconds delay before quitting the UI; so it does not look like the program crashed.
     delay(3000);
+    // Terminates all the process (so it is possible to fresh start a new scenario)
     exit();
   }
   if(theOscMessage.checkAddrPattern("/angle")) {
@@ -233,13 +276,13 @@ void oscEvent(OscMessage theOscMessage) {
       }
     }
   }
-  // Since it is difficult to get exactly 0° degree of roll, this threshold should help
+  // Since it is difficult to get exactly 0° degree of roll, this threshold should help the users in stabilizing the plank.
   if(isZero(angle)) {
     angle = 0.0;
     if (isInTargetArea && experimentStarted) {
+      timer.stop();  // Stop the timer as soon as possible; in this case as soon as the end condition is reached
       experimentStarted = false;
       experimentCompleted = true;
-      // To ensure that the timer stops immediately
     }
   }
 }
