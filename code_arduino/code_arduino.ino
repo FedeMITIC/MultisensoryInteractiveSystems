@@ -5,7 +5,7 @@
 * 
 * Author: Federico Macchi - federico.macchi-1@studenti.unitn.it
 * Contributors: Nicola "Lynn" Baratella - nicola.baratella@studenti.unitn.it
-* Date: 02/02/2020
+* Last update: 22/01/2020
 * 
 **/
 
@@ -269,14 +269,20 @@ void handle_received_message(char *received_message) {
       val = max_safe_dc;
   }
 
-  // Motor 1 = motor on the left
-  if (strcmp(command, "motor1") == 0) {
+  // Activate the motors
+  if (strcmp(command, "motor") == 0) {
     analogWrite(motor_left, val);
-  }
-
-  if (strcmp(command, "motor2") == 0) {
     analogWrite(motor_right, val);
   }
+  
+  // Motor 1 = motor on the left
+//  if (strcmp(command, "motor1") == 0) {
+//    analogWrite(motor_left, val);
+//  }
+//
+//  if (strcmp(command, "motor2") == 0) {
+//    analogWrite(motor_right, val);
+//  }
 } 
 
 
@@ -441,7 +447,7 @@ void loop() {
      We are interested only in the ROLL values (to determine the inclination angle of the bar)
     */ 
     /* Print the value read on the serial with 1 decimal only */
-    Serial.println(orientationData.orientation.y + correction_y, 1);
+    Serial.println(orientationData.orientation.y + correction_y, 3);
   }
    
 }

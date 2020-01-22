@@ -6,6 +6,8 @@ import netP5.*;
 NetAddress remote;   // Contains the object that sends the network messages
 OscP5 oscP5;         // Contains the object that listen to incoming messages
 
+OscMessage motor_message = new OscMessage("/motor");     // Message for scenario 2 & 4
+OscMessage speaker_message = new OscMessage("/speaker");   // Message for scenario 3 & 4
 
 float ballPosition_x = 0;
 float prevBallPosition = 0;
@@ -23,8 +25,13 @@ final int RIGHT_BOUNDARY = 700 - B_THRESHOLD;
 final float ANGLE_ZERO_THRESHOLD = 0.04363323129985824;
 final float MASS = 1;
 
+// Motors' constants
+final float MAX_PWR = 229.0;  // 90% DC
+final float MIN_PWR = 25.0;   // 10% DC
+final int OFF = 0;        //  0% DC
+final float LIN_SCALE = 0.191;  // Linear scale to map the distance of the ball (0,650] and the power of the motor [0,229]
 
-final int SCENARIO = 1;
+final int SCENARIO = 2;
 final int BALL_DIM = 20;
 final int TARGET_X = 500;
 final int TARGET_Y = 4;
@@ -95,14 +102,30 @@ void draw(){
   // To position the target and prepare the messages for PD
   switch(SCENARIO) {
     case 1: // Scenario 1: no feedback
-      fill(255, 0, 0);  // Red
-      rect(TARGET_X, TARGET_Y, TARGET_DIM_L, 10);
+        fill(255, 0, 0);  // Red
+        rect(TARGET_X, TARGET_Y, TARGET_DIM_L, 10);
       break;
     case 2: // Scenario 2: haptic feedback
+        fill(255, 0, 0);  // Red
+        rect(TARGET_X, TARGET_Y, TARGET_DIM_L, 10);
+        if (frameCount > 200 && experimentStarted) {  // https://forum.processing.org/two/discussion/8441/making-an-osc-router (thanks sojamo for the brilliant frameCount solution)
+          motor_message.clear();
+          motor_message = new OscMessage("/motor"); 
+          float pwr = applyThreshold(generateLinearScale());  // Remove apply threshold to obtain the real values (instead of the one in the interval 10%-90% DC)
+          String motor_command = "[motor,";
+          motor_command += (int)pwr;  // Arduino expects an integer.
+          motor_command += "]";
+          motor_message.add(motor_command);
+          oscP5.send(motor_message, remote);
+        }
       break;
     case 3: // Scenario 3: auditory feedback
+        fill(255, 0, 0);  // Red
+        rect(TARGET_X, TARGET_Y, TARGET_DIM_L, 10);
       break;
     case 4: // Scenario 4: auditory + haptic feedback
+        fill(255, 0, 0);  // Red
+        rect(TARGET_X, TARGET_Y, TARGET_DIM_L, 10);
       break;
     default: println("Select a Scenario [1-4]!");
       break;
@@ -136,11 +159,38 @@ boolean isZero(float n) {
   return (n >= -ANGLE_ZERO_THRESHOLD && n <= ANGLE_ZERO_THRESHOLD);
 }
 
+float generateLinearScale() {
+  // If the ball is in the target area, turn off both motors and return
+  if (isInTargetArea) {
+    return 0;
+  }
+  int distance = 0;
+  float pwr = 0;
+  // The ball is on the left side of the target area
+  if ((int)ballPosition_x < TARGET_X) {
+    distance = abs(TARGET_X - (int)ballPosition_x);
+    pwr = MAX_PWR - (distance * LIN_SCALE);
+  } else {  // The ball is on the right side of the target area
+    distance = abs((int)ballPosition_x - (TARGET_X + TARGET_DIM_L));
+    pwr = MAX_PWR - (distance * LIN_SCALE);
+  }
+  return pwr;
+}
+
+float applyThreshold(float n) {
+  if (n < MIN_PWR) {
+    return MIN_PWR;
+  }
+  if (n > MAX_PWR) {
+    return MAX_PWR;
+  }
+  return n;
+}
+
 /*
  * The angle received is always a float with one decimal
  */
 void oscEvent(OscMessage theOscMessage) {
-  println(theOscMessage.get(0).floatValue());
   // If the experiment is completed, close the interface
   if(experimentCompleted) {
     timer.stop();
