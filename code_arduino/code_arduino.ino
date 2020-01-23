@@ -7,6 +7,8 @@
 * Contributors: Nicola "Lynn" Baratella - nicola.baratella@studenti.unitn.it
 * Last update: 22/01/2020
 * 
+* Adapted from Luca Turchet's code.
+* 
 **/
 
 #include <Wire.h>
@@ -52,7 +54,6 @@ const uint16_t motor_right = 23;
 
 /* Set the delay between fresh samples */
 static const unsigned long BNO055_PERIOD_MILLISECS = 100; // E.g. 4 milliseconds per sample for 250 Hz
-//static const float BNO055_SAMPLING_FREQUENCY = 1.0e3f / PERIOD_MILLISECS;
 #define BNO055_PERIOD_MICROSECS 100.0e3f //= 1000 * PERIOD_MILLISECS;
 static uint32_t BNO055_last_read = 0;
 
@@ -271,15 +272,6 @@ void handle_received_message(char *received_message) {
     analogWrite(motor_left, val);
     analogWrite(motor_right, val);
   }
-  
-  // Motor 1 = motor on the left
-//  if (strcmp(command, "motor1") == 0) {
-//    analogWrite(motor_left, val);
-//  }
-//
-//  if (strcmp(command, "motor2") == 0) {
-//    analogWrite(motor_right, val);
-//  }
 } 
 
 
