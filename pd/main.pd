@@ -4,7 +4,7 @@
 #N canvas 712 205 905 623 in&out 0;
 #X obj 114 116 list-extend;
 #X obj 191 77 sel 10;
-#X msg 191 185 48 46 51 55 53;
+#X msg 191 185 48 46 51 49 51 13;
 #X obj 190 157 prepend set;
 #X obj 193 236 gate;
 #X msg 126 209 0;
@@ -70,30 +70,22 @@ Serial, f 41;
 0;
 #X msg 126 443 print [motor.0], f 24;
 #X text 125 423 EMERGENCY STOP FOR MOTORS, f 26;
-#X msg 837 590 \; pd dsp 1;
-#X msg 241 333 \; pd dsp 0;
+#X msg 390 333 \; pd dsp 0;
 #X text 687 12 Audio settings for my PC (Windows 10 \, i7) Block size:
 64 Sample Frequency: 44100Hz Delay: 50msec;
 #X text 115 217 Motors route;
-#X text 216 217 Audio route OFF;
-#X obj 241 297 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X text 365 217 Audio route OFF;
+#X obj 390 297 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 210 236 routeOSC /audioOFF;
-#X text 350 217 Speakers route;
-#X obj 343 295 oscillator_ref;
-#X obj 343 236 routeOSC /speaker;
-#X obj 822 473 cnv 15 250 100 empty empty empty 20 12 0 14 -4032 -262144
+#X obj 359 236 routeOSC /audioOFF;
+#X text 510 217 Speakers route;
+#X obj 503 295 oscillator_ref;
+#X obj 503 236 routeOSC /speaker;
+#X obj 822 473 cnv 15 250 60 empty empty empty 20 12 0 14 -4032 -262144
 0;
-#X obj 836 510 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 836 508 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X text 859 510 Scenarios 1 and 2;
-#X obj 837 539 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
-#X text 860 539 Scenarios 3 and 4;
 #X text 834 484 PD Control Panel;
-#X text 908 589 <-Click to start DSP;
-#X text 313 334 <-Click to stop DSP (automatically (de)activated by
-a message), f 43;
 #X text 821 332 PROCESSING;
 #X text 823 400 PURE DATA;
 #X text 822 416 1 Check that the correct comport is selected;
@@ -103,6 +95,12 @@ a message), f 43;
 #X text 818 304 !!!!! CHECKLIST & CONTROL PANEL !!!!!;
 #X text 820 364 2 Select SCENARIO and input Username;
 #X text 820 380 3 Run the code before connecting Pure Data;
+#X obj 255 297 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X msg 255 333 \; pd dsp 1;
+#X text 859 507 START;
+#X obj 224 236 routeOSC /audioON;
+#X text 230 217 Audio route ON;
 #X connect 1 0 7 0;
 #X connect 1 2 0 0;
 #X connect 2 0 1 0;
@@ -117,8 +115,9 @@ a message), f 43;
 #X connect 20 0 12 0;
 #X connect 21 0 20 1;
 #X connect 23 0 25 0;
-#X connect 23 0 43 0;
-#X connect 23 0 46 0;
+#X connect 23 0 42 0;
+#X connect 23 0 45 0;
+#X connect 23 0 61 0;
 #X connect 24 0 23 0;
 #X connect 25 0 31 0;
 #X connect 25 0 33 0;
@@ -130,11 +129,10 @@ a message), f 43;
 #X connect 32 0 6 0;
 #X connect 33 0 32 0;
 #X connect 35 0 6 0;
-#X connect 42 0 38 0;
-#X connect 43 0 42 0;
-#X connect 46 0 45 0;
-#X connect 48 0 21 0;
-#X connect 48 0 29 0;
-#X connect 50 0 21 0;
-#X connect 50 0 29 0;
-#X connect 50 0 37 0;
+#X connect 41 0 37 0;
+#X connect 42 0 41 0;
+#X connect 45 0 44 0;
+#X connect 47 0 21 0;
+#X connect 47 0 29 0;
+#X connect 58 0 59 0;
+#X connect 61 0 58 0;
