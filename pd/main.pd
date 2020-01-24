@@ -1,10 +1,10 @@
-#N canvas 198 21 1562 844 10;
-#X obj 424 549 print ERROR;
-#X obj 313 500 convert.ascii2pd CR;
+#N canvas 535 41 1329 844 10;
+#X obj 424 599 print ERROR;
+#X obj 313 575 convert.ascii2pd CR;
 #N canvas 712 205 905 623 in&out 0;
 #X obj 114 116 list-extend;
 #X obj 191 77 sel 10;
-#X msg 191 185 48 46;
+#X msg 191 185 48 46 51 55 53;
 #X obj 190 157 prepend set;
 #X obj 193 236 gate;
 #X msg 126 209 0;
@@ -25,77 +25,116 @@
 #X connect 7 0 1 0;
 #X connect 7 0 9 0;
 #X connect 9 1 0 0;
-#X restore 313 463 pd in&out;
-#X msg 313 352 devices;
-#X text 366 353 < Click me to see what is connected to serial port
+#X restore 313 538 pd in&out;
+#X msg 313 427 devices;
+#X text 366 428 < Click me to see what is connected to serial port
 ;
 #X text 100 33 NOTE: You need to have the file convert.ascii2pd.pd
 in the same folder as this patch;
-#X obj 313 428 comport 5 9600;
-#X floatatom 216 597 5 0 0 0 - - -;
-#X obj 362 796 netsend -u -b;
-#X msg 380 754 disconnect;
-#X obj 362 837 tgl 15 0 empty empty 1=connected 20 8 0 8 -262144 -1
+#X obj 313 503 comport 5 9600;
+#X floatatom 216 672 5 0 0 0 - - -;
+#X obj 362 871 netsend -u -b;
+#X msg 380 829 disconnect;
+#X obj 362 912 tgl 15 0 empty empty 1=connected 20 8 0 8 -262144 -1
 -1 0 1;
-#X obj 216 760 prepend send;
-#X obj 216 670 prepend /angle;
-#X obj 216 698 packOSC;
-#X text 412 434 Leave 9600 as baudrate;
+#X obj 216 835 prepend send;
+#X obj 216 745 prepend /angle;
+#X obj 216 773 packOSC;
+#X text 412 509 Leave 9600 as baudrate;
 #X text 98 15 Adatpted from Arduino 2 Pd - communication protocol by
 recyclism, f 68;
 #X text 99 64 Main Pure Data Patch Multisensory Interactive System
 - Federico Macchi | Nicola Baratella, f 91;
-#X text 276 317 Feedforward channel \; from Teensy 3.6 to Processing
+#X text 309 392 Feedforward channel \; from Teensy 3.6 to Processing
 \, via USB Serial and OSC Messages, f 68;
-#X text 539 723 < Click me to connect to Processing;
-#X text 447 796 "Active" if the connection is successfull;
-#X text 316 671 Prepare the message so that Processing can understand
-it;
+#X text 447 911 "Active" if the connection is successfull;
 #X text 99 102 Feedback channel \; from PD to Teensy 3.6 \, via USB
 Serial, f 41;
-#X obj 216 640 *;
-#X msg 314 597 0.0174533;
-#X text 312 579 PI / 180 for the conversion to radians;
-#X text 384 598 CLICK ME BEFORE CONNECTING!;
+#X obj 216 715 *;
+#X msg 314 672 0.0174533;
+#X text 314 689 PI / 180 for the conversion to radians, f 29;
 #X obj 101 173 unpackOSC;
 #X obj 101 142 netreceive -u -b 7778;
 #X obj 101 236 routeOSC /motor;
-#X msg 365 401 close;
-#X msg 364 377 open 5;
-#X text 411 422 < change the number "5" to the comport used by Teensy
+#X msg 365 476 close;
+#X msg 364 452 open 5;
+#X text 411 497 < change the number "5" to the comport used by Teensy
 ;
-#X msg 362 722 connect 127.0.0.1 7777;
+#X msg 362 797 connect 127.0.0.1 7777;
 #X msg 131 317 set print \$1;
 #X obj 131 284 list;
-#X msg 101 364 print [motor.0], f 24;
+#X msg 101 376 print [motor.0], f 24;
 #X obj 101 299 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 49 467 cnv 15 200 60 empty empty empty 20 12 0 14 -260097 -262144
+#X obj 100 413 cnv 15 200 60 empty empty empty 20 12 0 14 -260097 -262144
 0;
-#X msg 75 497 print [motor.0], f 24;
-#X text 74 477 EMERGENCY STOP FOR MOTORS, f 26;
+#X msg 126 443 print [motor.0], f 24;
+#X text 125 423 EMERGENCY STOP FOR MOTORS, f 26;
+#X msg 837 590 \; pd dsp 1;
+#X msg 241 333 \; pd dsp 0;
+#X text 687 12 Audio settings for my PC (Windows 10 \, i7) Block size:
+64 Sample Frequency: 44100Hz Delay: 50msec;
+#X text 115 217 Motors route;
+#X text 216 217 Audio route OFF;
+#X obj 241 297 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 210 236 routeOSC /audioOFF;
+#X text 350 217 Speakers route;
+#X obj 343 295 oscillator_ref;
+#X obj 343 236 routeOSC /speaker;
+#X obj 822 473 cnv 15 250 100 empty empty empty 20 12 0 14 -4032 -262144
+0;
+#X obj 836 510 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X text 859 510 Scenarios 1 and 2;
+#X obj 837 539 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X text 860 539 Scenarios 3 and 4;
+#X text 834 484 PD Control Panel;
+#X text 908 589 <-Click to start DSP;
+#X text 313 334 <-Click to stop DSP (automatically (de)activated by
+a message), f 43;
+#X text 821 332 PROCESSING;
+#X text 823 400 PURE DATA;
+#X text 822 416 1 Check that the correct comport is selected;
+#X text 822 432 2 Check that the correct IP Address is selected;
+#X text 823 449 3 Click on the appropriate button;
+#X text 820 348 1 Check that the correct IP Address is selected;
+#X text 818 304 !!!!! CHECKLIST & CONTROL PANEL !!!!!;
+#X text 820 364 2 Select SCENARIO and input Username;
+#X text 820 380 3 Run the code before connecting Pure Data;
 #X connect 1 0 7 0;
 #X connect 1 2 0 0;
 #X connect 2 0 1 0;
 #X connect 3 0 6 0;
 #X connect 6 0 2 0;
-#X connect 7 0 22 0;
+#X connect 7 0 20 0;
 #X connect 8 0 10 0;
 #X connect 9 0 8 0;
 #X connect 11 0 8 0;
 #X connect 12 0 13 0;
 #X connect 13 0 11 0;
-#X connect 22 0 12 0;
-#X connect 23 0 22 1;
-#X connect 26 0 28 0;
-#X connect 27 0 26 0;
-#X connect 28 0 34 0;
-#X connect 28 0 36 0;
-#X connect 29 0 6 0;
-#X connect 30 0 6 0;
-#X connect 32 0 8 0;
-#X connect 33 0 35 0;
-#X connect 34 0 33 0;
+#X connect 20 0 12 0;
+#X connect 21 0 20 1;
+#X connect 23 0 25 0;
+#X connect 23 0 43 0;
+#X connect 23 0 46 0;
+#X connect 24 0 23 0;
+#X connect 25 0 31 0;
+#X connect 25 0 33 0;
+#X connect 26 0 6 0;
+#X connect 27 0 6 0;
+#X connect 29 0 8 0;
+#X connect 30 0 32 0;
+#X connect 31 0 30 0;
+#X connect 32 0 6 0;
+#X connect 33 0 32 0;
 #X connect 35 0 6 0;
-#X connect 36 0 35 0;
-#X connect 38 0 6 0;
+#X connect 42 0 38 0;
+#X connect 43 0 42 0;
+#X connect 46 0 45 0;
+#X connect 48 0 21 0;
+#X connect 48 0 29 0;
+#X connect 50 0 21 0;
+#X connect 50 0 29 0;
+#X connect 50 0 37 0;
