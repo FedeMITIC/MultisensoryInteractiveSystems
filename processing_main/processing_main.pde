@@ -13,6 +13,8 @@ OscMessage speaker_message = new OscMessage("/speaker");   // Message for scenar
 
 // We want to make sure just one message to deactivate the audio is sent
 boolean deactivateAudioMessageSent = false;
+// We want to make sure just one message to activate the audio is sent
+boolean activateAudioMessageSent = false;
 
 float ballPosition_x = 0;
 float prevBallPosition = 0;
@@ -166,6 +168,13 @@ void draw(){
     case 3: // Scenario 3: auditory feedback
         fill(255, 0, 0);  // Red
         rect(TARGET_X, TARGET_Y, TARGET_DIM_L, 10);
+        // Turn Audio ON
+        if (experimentStarted && !activateAudioMessageSent) {
+          OscMessage audio_message = new OscMessage("/audioON");
+          oscP5.send(audio_message, remote);
+          audio_message.clear();
+          activateAudioMessageSent = true;
+        }
         if (frameCount > 200 && experimentStarted) {  // https://forum.processing.org/two/discussion/8441/making-an-osc-router (thanks sojamo for the brilliant frameCount solution)
           speaker_message.clear();
           speaker_message = new OscMessage("/speaker"); 
@@ -173,8 +182,9 @@ void draw(){
           speaker_message.add(distance);
           oscP5.send(speaker_message, remote);
         }
+        // Turn Audio OFF
         if (experimentCompleted && !deactivateAudioMessageSent) {
-          OscMessage audio_message = new OscMessage("/audioOFF");  // Turns OFF the audio
+          OscMessage audio_message = new OscMessage("/audioOFF");
           oscP5.send(audio_message, remote);
           audio_message.clear();
           deactivateAudioMessageSent = true;
@@ -183,6 +193,13 @@ void draw(){
     case 4: // Scenario 4: auditory + haptic feedback
         fill(255, 0, 0);  // Red
         rect(TARGET_X, TARGET_Y, TARGET_DIM_L, 10);
+        // Turn Audio ON
+        if (experimentStarted && !activateAudioMessageSent) {
+          OscMessage audio_message = new OscMessage("/audioON");
+          oscP5.send(audio_message, remote);
+          audio_message.clear();
+          activateAudioMessageSent = true;
+        }
         if (frameCount > 200 && experimentStarted) {  // https://forum.processing.org/two/discussion/8441/making-an-osc-router (thanks sojamo for the brilliant frameCount solution)
           // Send the speaker message
           speaker_message.clear();
