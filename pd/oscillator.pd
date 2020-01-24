@@ -1,4 +1,4 @@
-#N canvas 108 22 860 750 10;
+#N canvas 641 22 860 750 10;
 #X floatatom 357 377 5 0 0 0 Frequency_(hz) - -;
 #X msg 621 24 \; pd dsp 1;
 #X msg 620 58 \; pd dsp 0;
@@ -23,7 +23,7 @@
 #X text 700 20 <-Click to start DSP;
 #X text 699 57 <-Click to stop DSP;
 #X obj 189 69 hsl 128 15 0 1200 0 0 empty empty Ball-target_distance
--2 -8 0 10 -262130 -1 -1 12700 1;
+-2 -8 0 10 -262130 -1 -1 0 1;
 #X floatatom 299 136 5 0 0 0 - - -;
 #X obj 318 170 *;
 #X obj 410 224 +;
@@ -38,6 +38,8 @@
 #X msg 395 114 -1;
 #X obj 612 131 loadbang;
 #X msg 620 170 40;
+#X text 50 540 Audio settings for my PC (Windows 10 \, i7) Block size:
+64 Sample Frequency: 44100Hz Delay: 50msec;
 #X connect 0 0 26 0;
 #X connect 3 0 0 0;
 #X connect 4 0 5 0;
