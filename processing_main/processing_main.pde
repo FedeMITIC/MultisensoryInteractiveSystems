@@ -11,6 +11,9 @@ OscP5 oscP5;         // Contains the object that listen to incoming messages
 OscMessage motor_message = new OscMessage("/motor");     // Message for scenario 2 & 4
 OscMessage speaker_message = new OscMessage("/speaker");   // Message for scenario 3 & 4
 
+// We want to make sure just one message to deactivate the audio is sent
+boolean deactivateAudioMessageSent = false;
+
 float ballPosition_x = 0;
 float prevBallPosition = 0;
 float angle = 0; //radians
@@ -28,15 +31,15 @@ final float ANGLE_ZERO_THRESHOLD = 0.04363323129985824;
 final float MASS = 1;
 
 // Motors' constants
-final float MAX_PWR = 229.0;  // 90% DC
-final float MIN_PWR = 25.0;   // 10% DC
-final int OFF = 0;        //  0% DC
-final float LIN_SCALE = 0.191;  // Linear scale to map the distance of the ball (0,650] and the power of the motor [0,229]
+final float MAX_PWR = 178.5;  // 70% DC
+final float MIN_PWR = 51.0;   // 20% DC
+final int OFF = 0;            //  0% DC
+final float LIN_SCALE = 0.191;  // Linear scale to map the distance of the ball (0,1200] and the power of the motor [20%-70%]
 
 
 
 /* UPDATE THESE VARIABLES ACCORDINGLY */
-final int SCENARIO = 2;                   // Scenario to execute
+final int SCENARIO = 4;                   // Scenario to execute
 final String USR_NAME = "Federico";       // ID of the User (String)
 final String REMOTE_ADDR = "127.0.0.1";   // Remote address (if using different PCs)
 
@@ -69,6 +72,8 @@ class Timer {
 // For the log file
 Timer timer = new Timer();
 PrintWriter f_output;
+boolean f_available = false;   // If the file is available; correctly handles the IOException if thrown.
+String initial_message = "\n[" + getFullDate() + "] " + "User " + USR_NAME + " started Scenario " + SCENARIO + "\n";  // Will be printed only if the experiments starts (to avoid having a huge file if just testing out stuff) 
 
 // Change this to the desired output folder
 final String FILENAME = "C:/Users/FEDEM/Desktop/log.txt";
@@ -88,11 +93,12 @@ void setup() {
     FileWriter fw = new FileWriter(file, true);  //true = append
     BufferedWriter bw = new BufferedWriter(fw);
     f_output = new PrintWriter(bw);
-    f_output.write("\n[" + getFullDate() + "] " + "User " + USR_NAME + " started Scenario " + SCENARIO + "\n");
+    println("Logger setup completed");
+    f_available = true;
   } catch(IOException e) {
-    println("Error creating/opening file, maybe the path is incorrect...");
-    println("Impossible to continue");
-    exit();
+    println("[CRITICAL] Error creating/opening file, maybe the path is incorrect...");
+    println("[CRITICAL] This session will not be logged on file!");
+    f_available = false;
   }
   
   size(1400, 800, P2D);
@@ -160,10 +166,55 @@ void draw(){
     case 3: // Scenario 3: auditory feedback
         fill(255, 0, 0);  // Red
         rect(TARGET_X, TARGET_Y, TARGET_DIM_L, 10);
+        if (frameCount > 200 && experimentStarted) {  // https://forum.processing.org/two/discussion/8441/making-an-osc-router (thanks sojamo for the brilliant frameCount solution)
+          speaker_message.clear();
+          speaker_message = new OscMessage("/speaker"); 
+          int distance = getDistance();    // The speakers just want an integer containing the distance of the ball
+          speaker_message.add(distance);
+          oscP5.send(speaker_message, remote);
+        }
+        if (experimentCompleted && !deactivateAudioMessageSent) {
+          OscMessage audio_message = new OscMessage("/audioOFF");  // Turns OFF the audio
+          oscP5.send(audio_message, remote);
+          audio_message.clear();
+          deactivateAudioMessageSent = true;
+        }
       break;
     case 4: // Scenario 4: auditory + haptic feedback
         fill(255, 0, 0);  // Red
         rect(TARGET_X, TARGET_Y, TARGET_DIM_L, 10);
+        if (frameCount > 200 && experimentStarted) {  // https://forum.processing.org/two/discussion/8441/making-an-osc-router (thanks sojamo for the brilliant frameCount solution)
+          // Send the speaker message
+          speaker_message.clear();
+          speaker_message = new OscMessage("/speaker"); 
+          int distance = getDistance();    // The speakers just want an integer containing the distance of the ball
+          speaker_message.add(distance);
+          oscP5.send(speaker_message, remote);
+          // Send the motor message
+          motor_message.clear();
+          motor_message = new OscMessage("/motor"); 
+          float pwr = applyThreshold(generateLinearScale());  // Remove apply threshold to obtain the real values (instead of the one in the interval 10%-90% DC)
+          String motor_command = "[motor.";
+          motor_command += (int)pwr;  // Arduino expects an integer.
+          motor_command += "]";
+          motor_message.add(motor_command);
+          oscP5.send(motor_message, remote);
+        }
+        if (experimentCompleted && !deactivateAudioMessageSent) {
+          // Turn OFF the audio
+          OscMessage audio_message = new OscMessage("/audioOFF"); 
+          oscP5.send(audio_message, remote);
+          audio_message.clear();
+          deactivateAudioMessageSent = true;
+          motor_message.clear();
+          // Turn OFF motors
+          motor_message = new OscMessage("/motor"); 
+          String motor_command = "[motor.";
+          motor_command += 0;  // Arduino expects an integer.
+          motor_command += "]";
+          motor_message.add(motor_command);
+          oscP5.send(motor_message, remote);
+        }
       break;
     default: println("Select a Scenario [1-4]!");
       break;
@@ -208,17 +259,8 @@ float generateLinearScale() {
   if (isInTargetArea) {
     return MAX_PWR;
   }
-  int distance = 0;
-  float pwr = 0;
-  // The ball is on the left side of the target area
-  if ((int)ballPosition_x < TARGET_X) {
-    distance = abs(TARGET_X - (int)ballPosition_x);
-    pwr = MAX_PWR - (distance * LIN_SCALE);
-  } else {  // The ball is on the right side of the target area
-    distance = abs((int)ballPosition_x - (TARGET_X + TARGET_DIM_L));
-    pwr = MAX_PWR - (distance * LIN_SCALE);
-  }
-  return pwr;
+  int distance = getDistance();
+  return MAX_PWR - (distance * LIN_SCALE);
 }
 
 // Returns the time in the format hh:mm:ss
@@ -228,6 +270,18 @@ String getCurrTime() {
   int h = hour();
   return String.valueOf(h) + ":" + String.valueOf(m) + ":" + String.valueOf(s);
 }
+
+int getDistance() {
+  int distance = 0;
+  // The ball is on the left side of the target area
+  if ((int)ballPosition_x < TARGET_X) {
+    distance = abs(TARGET_X - (int)ballPosition_x); 
+  } else {  // The ball is on the right side of the target area
+    distance = abs((int)ballPosition_x - (TARGET_X + TARGET_DIM_L));
+  }
+  return distance;
+}
+  
 
 // Returns the date in the format dd/mm/yyyy - hh:mm:ss
 String getFullDate() {
@@ -254,11 +308,13 @@ void oscEvent(OscMessage theOscMessage) {
     if(!flag) {
       print("[", SCENARIO, "]", "Experiment completed. ");
       println("Elapsed time: ", elapsedTime, "ms", "(", ((float)elapsedTime / 1000) % 60, "s )");
-      f_output.write("[" + getCurrTime() + "] " + "User " + USR_NAME + " completed scenario " + SCENARIO + ". Total time: " + elapsedTime + "ms" + " (" + ((float)elapsedTime / 1000) % 60 + "s)" + "\n");
-      f_output.close();  // Close the file to release resources
+      if(f_available) {
+        f_output.write("\n" + USR_NAME + ":" + SCENARIO + ":" + elapsedTime + "\n");    // Prints an entry in the file in the format username:scenario:elapsedtime that is easy to parse in Excel and similar programs
+        f_output.close();  // Close the file to release resources
+      }
       flag = true;
     }
-    // 3 seconds delay before quitting the UI; so it does not look like the program crashed.
+    // 3 seconds delay before quitting the UI; so it does not look like the program crashed ;)
     delay(3000);
     // Terminates all the process (so it is possible to fresh start a new scenario)
     exit();
@@ -272,6 +328,7 @@ void oscEvent(OscMessage theOscMessage) {
       if(!experimentStarted && !isZero(angle)) {
         println("[", SCENARIO, "]", "Experiment started.");
         experimentStarted = true;
+        f_output.write(initial_message);
         timer.start();
       }
     }
