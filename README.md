@@ -29,4 +29,5 @@ The participant has a screen in front of them; this screen displays the virtual 
 ## Acknowledgements     
 
 Arduino2PD thanks to: http://hacklab.recyclism.com/workshops/arduino-to-pd-serial/  
-
+  
+Thanks to @sojamo for the (brilliant) frameCount solution here https://forum.processing.org/two/discussion/8441/making-an-osc-router 
