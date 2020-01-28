@@ -16,7 +16,7 @@ boolean deactivateAudioMessageSent = false;
 // We want to make sure just one message to activate the audio is sent
 boolean activateAudioMessageSent = false;
 
-float ballPosition_x = 0;
+float ballPosition_x = -150;
 float prevBallPosition = 0;
 float angle = 0; //radians
 boolean experimentStarted = false;  // Used to start the timer
@@ -41,8 +41,8 @@ final float LIN_SCALE = 0.191;  // Linear scale to map the distance of the ball 
 
 
 /* UPDATE THESE VARIABLES ACCORDINGLY */
-final int SCENARIO = 4;                   // Scenario to execute
-final String USR_NAME = "Federico";       // ID of the User (String)
+final int SCENARIO = 1;                   // Scenario to execute
+final String USR_NAME = "10";       // ID of the User (String)
 final String REMOTE_ADDR = "127.0.0.1";   // Remote address (if using different PCs)
 
 
