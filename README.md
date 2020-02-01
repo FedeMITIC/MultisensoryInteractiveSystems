@@ -20,7 +20,7 @@ It is based on the following main components:
 The software is written using C++ for Teensy, Pure Data for Pure Data and Java (Processing) for Processing; the communication between the three languages is established with two channels:  
 
 1. Feedforward channel: from Teensy to PD via USB Serial, from PD to Processing via the network interface (OSC Messages)
-2. Feedback    channel: -- UPDATE -- @see related issue
+2. Feedback    channel: from Processing to PD via the network interface (OSC Messages), from PD to Teensy via USB Serial
 
 ## Test Setup
 
